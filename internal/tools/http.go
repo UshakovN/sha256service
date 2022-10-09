@@ -7,11 +7,10 @@ import (
 )
 
 func WriteResponse(w http.ResponseWriter, _ *http.Request, p any) {
-	b, err := json.Marshal(p)
+	b, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
 		log.Printf("cannot convert data to json: %v", err)
 	}
-	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "application/json")
 	_, err = w.Write(b)
 	if err != nil {
