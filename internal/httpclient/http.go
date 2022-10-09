@@ -30,7 +30,7 @@ type HttpClient struct {
 	client  *http.Client
 }
 
-func NewHTTPClient(ctx context.Context) (*HttpClient, error) {
+func NewHTTPClient(ctx context.Context) *HttpClient {
 	client := &HttpClient{
 		ctx:     ctx,
 		limiter: semaphore.NewWeighted(httpTreadsCount),
@@ -38,7 +38,7 @@ func NewHTTPClient(ctx context.Context) (*HttpClient, error) {
 			Timeout: httpRequestTimeout,
 		},
 	}
-	return client, nil
+	return client
 }
 
 func (c *HttpClient) retryDoRequest(requestUrl string, requestHandler RequestCallback) (any, error) {

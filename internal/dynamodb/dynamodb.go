@@ -1,13 +1,10 @@
-package tools
+package dynamodb
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	db "github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"log"
 )
 
 const (
@@ -17,36 +14,14 @@ const (
 
 type Client struct {
 	ctx   context.Context
-	aws   *dynamodb.Client
+	aws   *db.Client
 	table *string
-}
-
-type Config struct {
-	ctx   context.Context
-	aws   aws.Config
-	table *string
-}
-
-func LoadDefaultConfig(ctx context.Context) *Config {
-	awsConfig, err := config.LoadDefaultConfig(ctx,
-		func(options *config.LoadOptions) error {
-			options.Region = awsRegion
-			return nil
-		})
-	if err != nil {
-		log.Fatal(err)
-	}
-	return &Config{
-		ctx:   ctx,
-		aws:   awsConfig,
-		table: aws.String(baseTable),
-	}
 }
 
 func NewDynamodbClient(config *Config) *Client {
 	return &Client{
 		ctx:   config.ctx,
-		aws:   dynamodb.NewFromConfig(config.aws),
+		aws:   db.NewFromConfig(config.aws),
 		table: config.table,
 	}
 }
@@ -56,7 +31,7 @@ func (client *Client) PutItem(item interface{}) error {
 	if err != nil {
 		return err
 	}
-	if _, err = client.aws.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	if _, err = client.aws.PutItem(context.TODO(), &db.PutItemInput{
 		TableName: client.table,
 		Item:      marshalItem,
 	}); err != nil {
@@ -70,7 +45,7 @@ func (client *Client) GetItem(keyValues interface{}, itemStruct interface{}) (in
 	if err != nil {
 		return nil, err
 	}
-	marshalItem, err := client.aws.GetItem(context.TODO(), &dynamodb.GetItemInput{
+	marshalItem, err := client.aws.GetItem(context.TODO(), &db.GetItemInput{
 		TableName: client.table,
 		Key:       marshalKeys,
 	})
@@ -89,7 +64,7 @@ func (client *Client) DeleteItem(keyValues interface{}) error {
 	if err != nil {
 		return err
 	}
-	if _, err = client.aws.DeleteItem(context.TODO(), &dynamodb.DeleteItemInput{
+	if _, err = client.aws.DeleteItem(context.TODO(), &db.DeleteItemInput{
 		TableName: client.table,
 		Key:       marshalKeys,
 	}); err != nil {
@@ -111,7 +86,7 @@ func (client *Client) WriteBatch(items []interface{}) error {
 			},
 		})
 	}
-	if _, err := client.aws.BatchWriteItem(context.TODO(), &dynamodb.BatchWriteItemInput{
+	if _, err := client.aws.BatchWriteItem(context.TODO(), &db.BatchWriteItemInput{
 		RequestItems: map[string][]types.WriteRequest{
 			*client.table: requests,
 		},

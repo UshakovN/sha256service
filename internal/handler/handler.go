@@ -2,49 +2,35 @@ package handler
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	"io"
-	"net/http"
-	"sha256service/internal/tools"
-	"sha256service/pkg/sha256"
-	"time"
+	"sha256service/internal/dynamodb"
+	"sha256service/internal/httpclient"
 )
 
-func GetRouterHandler() http.Handler {
-	router := mux.NewRouter()
-	router.HandleFunc("/create-hash-sum", HandleHashSum)
-	router.HandleFunc("/get-hash-sum", nil)
-	router.HandleFunc("/health", tools.HandleHealthRequest)
-	return router
+type Handler struct {
+	dynamodbClient *dynamodb.Client
+	httpClient     *httpclient.HttpClient
 }
 
-func validateRequest(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "unsupported method", http.StatusMethodNotAllowed)
+func NewRequestHandler(config *Config) *Handler {
+	return &Handler{
+		dynamodbClient: config.DynamodbClient,
+		httpClient:     config.HttpClient,
 	}
 }
 
-func HandleHashSum(w http.ResponseWriter, r *http.Request) {
-	validateRequest(w, r)
-	data, err := io.ReadAll(r.Body)
+func (h *Handler) PutItemHashInStore(item *ItemHash) error {
+	if err := h.dynamodbClient.PutItem(item); err != nil {
+		return fmt.Errorf("cannot put item hash to storage: %v", err)
+	}
+	return nil
+}
+
+func (h *Handler) GetItemHashFromStore(sum string) (*ItemHash, error) {
+	itemHash, err := h.dynamodbClient.GetItem(&ItemHashKey{
+		HashSum: sum,
+	}, &ItemHash{})
 	if err != nil {
-		tools.WriteRequestError(w, r, fmt.Errorf("cannot read request data"))
-		return
+		return nil, fmt.Errorf("cannot get item hash from storage")
 	}
-	startTime := time.Now()
-	hash := sha256.New()
-	hashSum := hash.Sum(data)
-	hashingTime := time.Since(startTime)
-	contentType := http.DetectContentType(data)
-	err = r.Body.Close()
-	if err != nil {
-		tools.WriteInternalError(w, r, fmt.Errorf("cannot close request body"))
-	}
-	resp := HashSumResponse{
-		MimeType:    contentType,
-		HashSum:     fmt.Sprintf("%x", hashSum),
-		HashedAt:    time.Now().UTC().Format(time.UnixDate),
-		HashingTime: hashingTime.String(),
-	}
-	tools.WriteResponse(w, r, resp)
+	return itemHash.(*ItemHash), nil
 }
