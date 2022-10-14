@@ -118,7 +118,7 @@ func (h *Handler) AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, fmt.Sprintf("auth token must be passed as '%s' header", authHeaderName), http.StatusForbidden)
 			return
 		}
-		session, found, err := h.GetUserSessionFromStore(authToken)
+		_, found, err := h.GetUserSessionFromStore(authToken)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("cannot get user session: %v", err), http.StatusInternalServerError)
 			return

@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"html/template"
 	"io"
 	"net/http"
 	"sha256service/internal/tools"
@@ -14,13 +15,30 @@ const (
 )
 
 func GetRoutesHandler(handler *Handler) http.Handler {
+
 	rootRouter := mux.NewRouter()
+	//rootRouter.PathPrefix("/css/").Handler(http.StripPrefix("/css/", http.FileServer(http.Dir("static/css/"))))
+	rootRouter.HandleFunc("/", handler.HandleMainPage)
+
 	apiRouter := rootRouter.PathPrefix("/").Subrouter()
 	apiRouter.HandleFunc("/get-hash", handler.HandleGetHash).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/create-hash", handler.HandleCreateHash).Methods(http.MethodPost)
 	apiRouter.HandleFunc("/create-http-content-hash", handler.HandleCreateHttpContentHash).Methods(http.MethodPost)
 	rootRouter.HandleFunc("/health", tools.HandleHealthRequest).Methods(http.MethodGet)
 	return rootRouter
+}
+
+func (h *Handler) HandleMainPage(w http.ResponseWriter, r *http.Request) {
+	path := "./templates/main.html"
+	t, err := template.ParseFiles(path)
+	if err != nil {
+		tools.WriteInternalError(w, r, fmt.Errorf("cannot parse %s", path))
+		return
+	}
+	if err := t.Execute(w, nil); err != nil {
+		tools.WriteInternalError(w, r, fmt.Errorf("cannot execute %s", path))
+		return
+	}
 }
 
 func (h *Handler) HandleCreateHash(w http.ResponseWriter, r *http.Request) {
