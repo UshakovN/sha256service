@@ -1,8 +1,9 @@
 const selectConstraints = document.getElementById('switchConstraints')
 const outConstraints = document.getElementById('constraints')
 
-selectConstraints.addEventListener('change', function() {
+selectConstraints.addEventListener('change', function () {
     let content
+    removeChildNodes(outConstraints)
     if (this.checked) {
         content =
             '<div class="input-group mb-3">\n' +
@@ -34,7 +35,6 @@ selectConstraints.addEventListener('change', function() {
             '                        </label>\n' +
             '                    </div>\n' +
             '                </div>'
+        outConstraints.insertAdjacentHTML('afterbegin', content)
     }
-    removeChildNodes(outConstraints)
-    outConstraints.insertAdjacentHTML('afterbegin', content)
 })
