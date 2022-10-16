@@ -5,122 +5,72 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
-    <!--<link rel="stylesheet" href="css/style.css">-->
+    <link rel="stylesheet" href="css/style.css">
     <title>Курсовая работа</title>
 </head>
 <body>
 
 <div class="container">
-    <form action="main.html" class="form" method="post">
+    <form spellcheck="false">
         <br>
-        <h1>Сервис хеширования 📠</h1>
-        <br>
+        <h1>Сервис хеширования 🔏</h1><br>
         <div class="form-group row">
-            <label for="inputSecret" class="col-sm col-form-label">Парольная фраза 🔏</label>
+            <label for="inputSecret" class="col-sm col-form-label">Парольная фраза 🖋</label>
             <div class="col-sm-10">
-                <input type="password" class="form-control" id="inputSecret" placeholder="Введите секрет...">
+                <input type="password" class="form-control" id="inputSecret" name="secret"
+                       placeholder="Введите парольную фразу...">
+                <br>
+                <div class="form-check form-switch">
+                    <label for="switchConstraints" class="form-check-label">Ограничения</label>
+                    <input class="form-check-input" type="checkbox" id="switchConstraints">
+                </div>
+                <br>
+                <div class="form-group row" id="constraints"></div>
+                <script src="js/constraints.js"></script>
             </div>
-        </div>
-        <br>
-        <div class="form-group row">
-            <label for="selectorContentType" class="col-sm col-form-label">Тип контента ⚙️</label>
-            <div class="col-sm-10">
-                <select class="form-select" id="selectorContentType">
-                    <option value="">Нажмите для выбора</option>
-                    <option value="plain-text">Открытый текст</option>
-                    <option value="http-content">Контент из сети</option>
-                    <option value="file">Произвольный файл</option>
-                </select>
+            </div>
+            <br><br>
+            <div class="form-group row">
+                <label for="selectorContentType" class="col-sm col-form-label">Тип контента 💾️️</label>
+                <div class="col-sm-10">
+                    <select class="form-select" id="selectorContentType" name="selector">
+                        <option value="">Нажмите для выбора</option>
+                        <option value="plain-text">Открытый текст</option>
+                        <option value="http-content">Контент из сети</option>
+                        <option value="file">Произвольный файл</option>
+                    </select>
+                </div>
             </div>
             <br>
-        </div>
-        <br>
-        <div class="form-group row" id="input"></div>
-        <script>
-            let selector = document.querySelector('select')
-            let input = document.getElementById('input')
-            selector.addEventListener('change', setInput)
-
-            function setInput() {
-                let type = selector.value
-                let content
-                switch (type) {
-                    case "plain-text":
-                        content = '<label for="textareaPlainText" class="col-sm col-form-label">Открытый текст 📄</label>' +
-                            '<div class="col-sm-10">' +
-                            '<textarea class="form-control plaintext" id="inputControl" rows="1" placeholder="Введите текст..."></textarea>' +
-                            '</div>'
-                        break
-                    case "http-content":
-                        content = '<label for="inputPlainText" class="col-sm col-form-label">Контент из сети 🌐</label>' +
-                            '<div class="col-sm-10">' +
-                            '<input type="text" class="form-control" id="inputControl" placeholder="https://bars.mpei.ru/" width="200px">' +
-                            '</div>'
-                        break
-                    case "file":
-                        content = '<div class="mb-3">' +
-                            '<input class="form-control" type="file" id="inputControl"></div>'
-                        break
-                    default:
-                        removeChildNodes(input)
-                        return
-                }
-                removeChildNodes(input)
-                input.insertAdjacentHTML('afterbegin', content)
-            }
-        </script>
-
-        <br>
-        <div class="form-group" id="button"></div>
-        <script>
-            let button = document.getElementById('button')
-            selector.addEventListener('change', setButton)
-
-            function setButton() {
-                removeChildNodes(button)
-                if (selector.value.trim() !== '') {
-                    let content = '<button type="button" class="btn btn-secondary">Получить хеш-сумму</button>' +
-                        '<span class="tab"></span> ' +
-                        '<button type="button" class="btn btn-secondary">Сравнить хеш-суммы</button>'
-                    button.insertAdjacentHTML('afterbegin', content)
-                }
-            }
-        </script>
-
-        <br><br>
-        <div class="form-group row">
-            <label for="outputHashSum" class="col-sm col-form-label">Выходная сумма 🔒</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="outputHashSum"
-                       onclick="clipboardContent()"
-                       placeholder="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" readonly>
+            <div class="form-group row" id="input"></div>
+            <script src="js/input.js"></script>
+            <br>
+            <div class="form-group" id="button"></div>
+            <script src="js/button.js"></script>
+            <br><br><br>
+            <div class="form-group row">
+                <label for="outputHashSum" class="col-sm col-form-label">Выходная сумма 🔒</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="outputHashSum"
+                           onclick="clipboardContent()"
+                           placeholder="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                           readonly>
+                </div>
             </div>
-        </div>
-        <script>
-            function clipboardContent() {
-                let text = document.getElementById("outputHashSum");
-                text.select();
-                navigator.clipboard.writeText(text.value);
-            }
-        </script>
-
-        <div>
-            <script>
-                function removeChildNodes(el) {
-                    while (el.firstChild) {
-                        el.removeChild(el.firstChild);
-                    }
-                }
-            </script>
-        </div>
+            <br>
+            <div>
+                <button type="button" class="btn btn-outline-primary" id="save">
+                    Сохранить хеш-сумму в файл
+                </button>
+                <span class="tab"></span>
+                <a href="/about" target="_blank" class="btn btn-outline-primary" type="button">
+                    О программе 🔎
+                </a>
+            </div>
+            <script src="js/common.js"></script>
+            <script src="js/handlers.js"></script>
     </form>
-
-    <br><br>
-    <div>
-        <a href="./author.html" target="_blank" class="link-secondary">О программе 🔎</a>
-    </div>
 </div>
-
 
 </body>
 </html>

@@ -11,14 +11,19 @@ import (
 )
 
 const (
-	contentTypePlainText = "text/plain"
+	contentTypePlainText   = "text/plain"
+	htmlTemplateMain       = "main.html"
+	htmlTemplateAbout      = "about.html"
+	htmlTemplatePrefixPath = "./templates/"
 )
 
 func GetRoutesHandler(handler *Handler) http.Handler {
-
 	rootRouter := mux.NewRouter()
-	//rootRouter.PathPrefix("/css/").Handler(http.StripPrefix("/css/", http.FileServer(http.Dir("static/css/"))))
+	rootRouter.PathPrefix("/css/").Handler(http.StripPrefix("/css/", http.FileServer(http.Dir("assets/css/"))))
+	rootRouter.PathPrefix("/js/").Handler(http.StripPrefix("/js/", http.FileServer(http.Dir("assets/js/"))))
+
 	rootRouter.HandleFunc("/", handler.HandleMainPage)
+	rootRouter.HandleFunc("/about", handler.HandleAboutPage)
 
 	apiRouter := rootRouter.PathPrefix("/").Subrouter()
 	apiRouter.HandleFunc("/get-hash", handler.HandleGetHash).Methods(http.MethodGet)
@@ -28,8 +33,21 @@ func GetRoutesHandler(handler *Handler) http.Handler {
 	return rootRouter
 }
 
+func (h *Handler) HandleAboutPage(w http.ResponseWriter, r *http.Request) {
+	path := fmt.Sprint(htmlTemplatePrefixPath, htmlTemplateAbout)
+	t, err := template.ParseFiles(path)
+	if err != nil {
+		tools.WriteInternalError(w, r, fmt.Errorf("cannot parse %s", path))
+		return
+	}
+	if err := t.Execute(w, nil); err != nil {
+		tools.WriteInternalError(w, r, fmt.Errorf("cannot execute %s", path))
+		return
+	}
+}
+
 func (h *Handler) HandleMainPage(w http.ResponseWriter, r *http.Request) {
-	path := "./templates/main.html"
+	path := fmt.Sprint(htmlTemplatePrefixPath, htmlTemplateMain)
 	t, err := template.ParseFiles(path)
 	if err != nil {
 		tools.WriteInternalError(w, r, fmt.Errorf("cannot parse %s", path))

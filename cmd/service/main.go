@@ -16,6 +16,7 @@ import (
 
 func ContinuouslyHandleRequests(port *string, mux http.Handler) {
 	log.Printf("start listening on port: %s", *port)
+	log.Printf("http://localhost:%s", *port)
 	if err := http.ListenAndServe(":"+*port, mux); err != nil {
 		log.Fatalf("server listening error: %v", err)
 	}
