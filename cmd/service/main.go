@@ -5,13 +5,10 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"sha256service/internal/dynamodb"
 	"sha256service/internal/handler"
 	"sha256service/internal/httpclient"
 	"sha256service/pkg/sha256"
-	"syscall"
 )
 
 func ContinuouslyHandleRequests(port *string, mux http.Handler) {
@@ -37,7 +34,7 @@ func main() {
 
 	go ContinuouslyHandleRequests(port, routesHandler)
 
-	exitSignal := make(chan os.Signal)
-	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
-	<-exitSignal
+	//exitSignal := make(chan os.Signal)
+	//signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
+	//<-exitSignal
 }
