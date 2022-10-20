@@ -13,62 +13,63 @@
 <div class="container">
     <form spellcheck="false">
         <br>
-        <h1>Сервис хеширования 🔏</h1><br>
+        <h2>Сервис хеширования</h2>
         <div class="form-group row">
-            <label for="inputSecret" class="col-sm col-form-label">Парольная фраза 🖋</label>
+            <label for="inputSecret" class="col-sm col-form-label">Парольная фраза</label>
             <div class="col-sm-10">
                 <input type="password" class="form-control" id="inputSecret" name="secret"
-                       placeholder="Введите парольную фразу...">
-                <br>
+                       placeholder="Введите парольную фразу..." onchange="">
                 <div class="form-check form-switch">
                     <label for="switchConstraints" class="form-check-label">Ограничения</label>
                     <input class="form-check-input" type="checkbox" id="switchConstraints">
                 </div>
-                <br>
                 <div class="form-group row" id="constraints"></div>
                 <script src="js/constraints.js"></script>
             </div>
+        </div>
+        <div class="form-group row">
+            <label for="selectorContentType" class="col-sm col-form-label">Тип контента️</label>
+            <div class="col-sm-10">
+                <select class="form-select" id="selectorContentType" name="selector">
+                    <option value="">Нажмите для выбора</option>
+                    <option value="plain-text">Открытый текст</option>
+                    <option value="http-content">Контент из сети</option>
+                    <option value="file">Произвольный файл</option>
+                </select>
             </div>
-            <br><br>
-            <div class="form-group row">
-                <label for="selectorContentType" class="col-sm col-form-label">Тип контента 💾️️</label>
-                <div class="col-sm-10">
-                    <select class="form-select" id="selectorContentType" name="selector">
-                        <option value="">Нажмите для выбора</option>
-                        <option value="plain-text">Открытый текст</option>
-                        <option value="http-content">Контент из сети</option>
-                        <option value="file">Произвольный файл</option>
-                    </select>
-                </div>
+        </div>
+        <br>
+
+        <div class="form-group row" id="input"></div>
+        <script src="js/input.js"></script>
+
+        <div class="form-group row" id="mode"></div>
+        <script src="js/mode.js"></script>
+        <br>
+
+        <div class="form-group" id="button"></div>
+        <script src="js/button.js"></script>
+        <script src="js/loadfile.js"></script>
+
+        <div class="form-group row">
+            <label for="outputHashSum" class="col-sm col-form-label">Результат выполнения</label>
+            <div class="col-sm-10">
+                    <textarea type="text" class="form-control" id="outputHashSum"
+                              onclick="clipboardContent()" rows="1"
+                              placeholder="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"></textarea>
             </div>
-            <br>
-            <div class="form-group row" id="input"></div>
-            <script src="js/input.js"></script>
-            <br>
-            <div class="form-group" id="button"></div>
-            <script src="js/button.js"></script>
-            <br><br><br>
-            <div class="form-group row">
-                <label for="outputHashSum" class="col-sm col-form-label">Выходная сумма 🔒</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="outputHashSum"
-                           onclick="clipboardContent()"
-                           placeholder="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-                           readonly>
-                </div>
-            </div>
-            <br>
-            <div>
-                <button type="button" class="btn btn-outline-primary" id="save">
-                    Сохранить хеш-сумму в файл
-                </button>
-                <span class="tab"></span>
-                <a href="/about" target="_blank" class="btn btn-outline-primary" type="button">
-                    О программе 🔎
-                </a>
-            </div>
-            <script src="js/common.js"></script>
-            <script src="js/handlers.js"></script>
+        </div>
+        <div>
+            <button type="button" class="btn btn-outline-primary" id="save">
+                Сохранить результат в файл
+            </button>
+            <span class="tab"></span>
+            <a href="/about" target="_blank" class="btn btn-outline-primary" type="button">
+                О программе
+            </a>
+        </div>
+        <script src="js/common.js"></script>
+        <script src="js/handlers.js"></script>
     </form>
 </div>
 

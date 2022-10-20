@@ -9,8 +9,6 @@ selectConstraints.addEventListener('change', function () {
             '<div class="input-group mb-3">\n' +
             '                    <input type="number" min="0" max="40" onKeyDown="return onlyNumberKey(event)"\n' +
             '                           class="form-control" placeholder="Минимальная длина">\n' +
-            '                    <input type="number" min="0" max="40" onKeyDown="return onlyNumberKey(event)"\n' +
-            '                           class="form-control" placeholder="Максимальная длина">\n' +
             '                    <input type="text" maxlength="20" class="form-control" placeholder="Обязательные символы">\n' +
             '                </div>\n' +
             '                <div class="input-group mb-3">\n' +
