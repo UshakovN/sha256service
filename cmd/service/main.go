@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sha256service/internal/dynamodb"
 	"sha256service/internal/handler"
 	"sha256service/internal/httpclient"
 	"sha256service/pkg/sha256"
@@ -28,10 +27,9 @@ func main() {
 	ctx := context.Background()
 
 	requestHandler := handler.NewRequestHandler(&handler.Config{
-		Ctx:            ctx,
-		HashClient:     sha256.New(),
-		DynamodbClient: dynamodb.NewDynamodbClient(dynamodb.LoadDefaultConfig(ctx)),
-		HttpClient:     httpclient.NewHTTPClient(ctx),
+		Ctx:        ctx,
+		HashClient: sha256.New(),
+		HttpClient: httpclient.NewHTTPClient(ctx),
 	})
 	routesHandler := handler.GetRoutesHandler(requestHandler)
 
