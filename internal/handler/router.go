@@ -26,7 +26,6 @@ func GetRoutesHandler(handler *Handler) http.Handler {
 	rootRouter.HandleFunc("/about", handler.HandleAboutPage)
 
 	apiRouter := rootRouter.PathPrefix("/").Subrouter()
-	apiRouter.HandleFunc("/get-hash", handler.HandleGetHash).Methods(http.MethodGet)
 	apiRouter.HandleFunc("/create-hash", handler.HandleCreateHash).Methods(http.MethodPost)
 	apiRouter.HandleFunc("/create-http-content-hash", handler.HandleCreateHttpContentHash).Methods(http.MethodPost)
 	rootRouter.HandleFunc("/health", tools.HandleHealthRequest).Methods(http.MethodGet)
@@ -74,10 +73,6 @@ func (h *Handler) HandleCreateHash(w http.ResponseWriter, r *http.Request) {
 		tools.WriteInternalError(w, r, fmt.Errorf("cannot close request body"))
 	}
 	resp := itemHash
-	if err := h.PutItemHashInStore(resp); err != nil {
-		tools.WriteInternalError(w, r, err)
-		return
-	}
 	tools.WriteResponse(w, r, resp)
 }
 
@@ -87,23 +82,6 @@ func (h *Handler) getHashQueryParam(r *http.Request) (string, error) {
 		return "", fmt.Errorf("parameter 'sum' is mandatory")
 	}
 	return sum, nil
-}
-
-func (h *Handler) HandleGetHash(w http.ResponseWriter, r *http.Request) {
-	sum, err := h.getHashQueryParam(r)
-	if err != nil {
-		tools.WriteRequestError(w, r, err)
-		return
-	}
-	item, found, err := h.GetItemHashFromStore(sum)
-	if found {
-		item.HashFound = true
-	}
-	if err != nil {
-		tools.WriteInternalError(w, r, err)
-		return
-	}
-	tools.WriteResponse(w, r, item)
 }
 
 func (h *Handler) getContentUrl(r *http.Request) (string, error) {
@@ -141,9 +119,5 @@ func (h *Handler) HandleCreateHttpContentHash(w http.ResponseWriter, r *http.Req
 		tools.WriteInternalError(w, r, fmt.Errorf("cannot get item hash: %v", err))
 	}
 	resp := itemHash
-	if err := h.PutItemHashInStore(resp); err != nil {
-		tools.WriteInternalError(w, r, err)
-		return
-	}
 	tools.WriteResponse(w, r, resp)
 }
