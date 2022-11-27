@@ -4,7 +4,9 @@ saveButton.addEventListener('click', saveAsFile)
 function clipboardContent() {
     let text = document.getElementById("outputHashSum")
     text.select()
-    navigator.clipboard.writeText(text.value).then()
+    if (text.value !== null) {
+        navigator.clipboard.writeText(text.value).then()
+    }
 }
 
 function removeChildNodes(el) {

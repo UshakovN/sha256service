@@ -165,7 +165,6 @@ function validateSecret(secret, output) {
         return false
     }
     let secretText = secret.value
-    console.log('Парольная фраза: ', secretText)
     if (secretText.length < secretMinLen) {
         output.innerText = invalidSecretLen
         return false
