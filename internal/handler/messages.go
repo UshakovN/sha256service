@@ -1,42 +1,63 @@
 package handler
 
-type ItemHash struct {
-	HashFound   bool   `json:"hash_found" dynamodbav:"_"`
-	HashSum     string `json:"hash_sum" dynamodbav:"hash_sum"`
-	MimeType    string `json:"mime_type" dynamodbav:"mime_type"`
-	HashedAt    string `json:"hashed_at" dynamodbav:"hashed_at"`
-	HashingTime string `json:"hashing_time" dynamodbav:"hashing_time"`
+import (
+  "fmt"
+  "encoding/base64"
+)
+
+const (
+  PayloadTypeString      = "string"
+  PayloadTypeEncodedFile = "encoded-file"
+)
+
+type CreateHashRequest struct {
+  Secret      string `json:"secret"`
+  Payload     any    `json:"payload"`
+  PayloadType string `json:"payload_type"`
 }
 
-type itemHashKey struct {
-	HashSum string `dynamodbav:"hash_sum"`
+type CreateHashResponse struct {
+  HashSum     string `json:"hash_sum"`
+  HashedAt    string `json:"hashed_at"`
+  HashingTime string `json:"hashing_time"`
 }
 
-type UserSession struct {
-	Id            string `json:"id" dynamodbav:"id"`
-	UserLogin     string `json:"user_login" dynamodbav:"user_login"`
-	Expired       bool   `json:"expired" dynamodbav:"expired"`
-	LastLoginDate string `json:"last_login_date" dynamodb:"last_login_date"`
+type CompareHashRequest struct {
+  Secret      string `json:"secret"`
+  ClaimHash   string `json:"claim_hash"`
+  Payload     any    `json:"payload"`
+  PayloadType string `json:"payload_type"`
 }
 
-type userSessionKey struct {
-	Id string `dynamodbav:"id"`
+type CompareHashResponse struct {
+  Equal      bool   `json:"equal"`
+  ComparedAt string `json:"compared_at"`
 }
 
-type AuthRequest struct {
-	Login    string `json:"login" dynamodbav:"login"`
-	Password string `json:"password" dynamodbav:"password"`
-}
+func preparePayload(payload any, payloadType string) ([]byte, error) {
+  var b []byte
+  switch payloadType {
 
-type AuthResponse struct {
-	SessionId string `json:"session_id"`
-}
+  case PayloadTypeEncodedFile:
+    payloadStr, ok := payload.(string)
+    if !ok {
+      return nil, fmt.Errorf("invalid file base64 string")
+    }
+    var err error
+    b, err = base64.StdEncoding.DecodeString(payloadStr)
+    if err != nil {
+      return nil, fmt.Errorf("cannot decode file base64 string")
+    }
 
-type User struct {
-	Login    string `json:"login" dynamodbav:"login"`
-	Password string `json:"password" dynamodbav:"password"`
-}
+  case PayloadTypeString:
+    fallthrough
+  default:
+    payloadStr, ok := payload.(string)
+    if !ok {
+      return nil, fmt.Errorf("invalid plain text")
+    }
+    b = []byte(payloadStr)
+  }
 
-type userKey struct {
-	Login string `dynamodbav:"login"`
+  return b, nil
 }

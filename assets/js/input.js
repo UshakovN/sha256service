@@ -15,15 +15,6 @@ function setInput() {
                     '</textarea>' +
                 '</div>'
             break
-        case "http-content":
-            content =
-                '<label for="inputPlainText" class="col-sm col-form-label">' +
-                    'Контент из сети' +
-                '</label>' +
-                '<div class="col-sm-10">' +
-                    '<input type="text" class="form-control" id="inputControl" name="input" placeholder="https://bars.mpei.ru/" width="200px">' +
-                '</div>'
-            break
         case "file":
             content =
                 '<div class="mb-3">' +

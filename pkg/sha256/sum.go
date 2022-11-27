@@ -13,6 +13,8 @@ const (
 )
 
 func (h *SHA256) Sum(data []byte) [sumSize]byte {
+	h.resetState()
+
 	padded := h.padMessage(data)
 	chunks := h.chunks(padded)
 
@@ -68,6 +70,8 @@ func (h *SHA256) Sum(data []byte) [sumSize]byte {
 
 	var out [sumSize]byte
 	copy(out[:], buf.Bytes())
+
+	h.resetState()
 
 	return out
 }
