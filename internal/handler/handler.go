@@ -3,46 +3,42 @@ package handler
 import (
   "context"
   "fmt"
-  "sha256service/internal/httpclient"
+  "sha256service/pkg/sha256"
   "time"
-  "crypto/sha256"
+  "sha256service/internal/request"
 )
 
 type Handler struct {
-  ctx context.Context
-  //hashClient *sha256.SHA256
-  httpClient *httpclient.HttpClient
+  ctx        context.Context
+  hashClient *sha256.SHA256
 }
 
 func NewRequestHandler(config *Config) *Handler {
   return &Handler{
-    //hashClient: config.HashClient,
-    httpClient: config.HttpClient,
+    ctx:        config.Ctx,
+    hashClient: config.HashClient,
   }
 }
 
-func (h *Handler) GetHash(payload []byte, secret string) (*CreateHashResponse, error) {
+func (h *Handler) GetHash(payload []byte, secret string) (*request.CreateHashResponse, error) {
   startTime := time.Now()
-  //hashSum := h.hashClient.Sum(payload)
-  hashSum := sha256.Sum256(payload)
+  hashSum := h.hashClient.Sum(payload, secret)
 
   hashingTime := time.Since(startTime)
-  return &CreateHashResponse{
+  return &request.CreateHashResponse{
     HashSum:     fmt.Sprintf("%x", hashSum),
     HashedAt:    time.Now().UTC().Format(time.UnixDate),
     HashingTime: hashingTime.String(),
   }, nil
 }
 
-func (h *Handler) CompareHash(payload []byte, claimHash string, secret string) (*CompareHashResponse, error) {
+func (h *Handler) CompareHash(payload []byte, claimHash string, secret string) (*request.CompareHashResponse, error) {
   var equal bool
-  //hashSum := h.hashClient.Sum(payload)
-  hashSum := sha256.Sum256(payload)
-
+  hashSum := h.hashClient.Sum(payload, secret)
   if claimHash == fmt.Sprintf("%x", hashSum) {
     equal = true
   }
-  return &CompareHashResponse{
+  return &request.CompareHashResponse{
     Equal:      equal,
     ComparedAt: time.Now().UTC().Format(time.UnixDate),
   }, nil

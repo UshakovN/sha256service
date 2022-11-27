@@ -17,7 +17,7 @@ function setButton() {
                 '        <textarea type="text" class="form-control" id="compareInput" rows="1"' +
                 '               placeholder="Введите хеш значение или загрузите его из файла..."></textarea>' +
                 '    </div>' +
-                '            <input class="form-control" type="file" id="compareFile" onChange="readFilePlainText(event)">' +
+                '            <input class="form-control" type="file" id="compareFile" onChange="readFilePlainText()">' +
                 '    <div>' +
                 '        <button type="button" class="btn btn-outline-primary" onclick="handleCompareHash()">' +
                 '            Сравнить хеш-суммы' +

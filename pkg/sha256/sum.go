@@ -1,120 +1,126 @@
 package sha256
 
 import (
-	"bytes"
-	"encoding/binary"
-	"math/bits"
+  "encoding/binary"
 )
 
-const (
-	sumSize       = 32
-	chunkSize     = 64
-	chunkSizeBits = chunkSize * 8
-)
+func (hash *SHA256) Sum(message []byte, secret string) [32]byte {
+  hash.resetState()
 
-func (h *SHA256) Sum(data []byte) [sumSize]byte {
-	h.resetState()
+  message = applySecret(message, secret)
 
-	padded := h.padMessage(data)
-	chunks := h.chunks(padded)
+  initial := hash.getInitial()
 
-	initial := h.initial
-	k := h.k
+  h0 := initial[0]
+  h1 := initial[1]
+  h2 := initial[2]
+  h3 := initial[3]
+  h4 := initial[4]
+  h5 := initial[5]
+  h6 := initial[6]
+  h7 := initial[7]
 
-	for _, chunk := range chunks {
-		ms := h.messageSchedule(chunk)
+  k := hash.getK()
 
-		for i := 16; i < 64; i++ {
-			s0 := bits.RotateLeft32(ms[i-15], -7) ^ bits.RotateLeft32(ms[i-15], -18) ^ (ms[i-15] >> 3)
-			s1 := bits.RotateLeft32(ms[i-2], -17) ^ bits.RotateLeft32(ms[i-2], -19) ^ (ms[i-2] >> 10)
-			ms[i] = ms[i-16] + s0 + ms[i-7] + s1
-		}
+  padded := append(message, 0x80)
+  if len(padded)%64 < 56 {
+    suffix := make([]byte, 56-(len(padded)%64))
+    padded = append(padded, suffix...)
+  } else {
+    suffix := make([]byte, 64+56-(len(padded)%64))
+    padded = append(padded, suffix...)
+  }
+  msgLen := len(message) * 8
+  bs := make([]byte, 8)
+  binary.BigEndian.PutUint64(bs, uint64(msgLen))
+  padded = append(padded, bs...)
 
-		a := initial[0]
-		b := initial[1]
-		c := initial[2]
-		d := initial[3]
-		e := initial[4]
-		f := initial[5]
-		g := initial[6]
-		h := initial[7]
+  var broken [][]byte
+  for i := 0; i < len(padded)/64; i++ {
+    broken = append(broken, padded[i*64:i*64+63])
+  }
+  for _, chunk := range broken {
+    var w []uint32
+    for i := 0; i < 16; i++ {
+      w = append(w, binary.BigEndian.Uint32(chunk[i*4:i*4+4]))
+    }
+    w = append(w, make([]uint32, 48)...)
 
-		for j := 0; j < 64; j++ {
-			S1 := bits.RotateLeft32(e, -6) ^ bits.RotateLeft32(e, -11) ^ bits.RotateLeft32(e, -25)
-			ch := (e & f) ^ ((^e) & g)
-			temp1 := h + S1 + ch + k[j] + ms[j]
-			S0 := bits.RotateLeft32(a, -2) ^ bits.RotateLeft32(a, -13) ^ bits.RotateLeft32(a, -22)
-			maj := (a & b) ^ (a & c) ^ (b & c)
-			temp2 := S0 + maj
-			h = g
-			g = f
-			f = e
-			e = d + temp1
-			d = c
-			c = b
-			b = a
-			a = temp1 + temp2
-		}
-		initial[0] += a
-		initial[1] += b
-		initial[2] += c
-		initial[3] += d
-		initial[4] += e
-		initial[5] += f
-		initial[6] += g
-		initial[7] += h
-	}
+    for i := 16; i < 64; i++ {
+      s0 := rotR(w[i-15], 7) ^ rotR(w[i-15], 18) ^ (w[i-15] >> 3)
+      s1 := rotR(w[i-2], 17) ^ rotR(w[i-2], 19) ^ (w[i-2] >> 10)
+      w[i] = w[i-16] + s0 + w[i-7] + s1
+    }
 
-	buf := new(bytes.Buffer)
-	_ = binary.Write(buf, binary.BigEndian, initial)
+    a := h0
+    b := h1
+    c := h2
+    d := h3
+    e := h4
+    f := h5
+    g := h6
+    h := h7
 
-	var out [sumSize]byte
-	copy(out[:], buf.Bytes())
+    for i := 0; i < 64; i++ {
+      S1 := rotR(e, 6) ^ rotR(e, 11) ^ rotR(e, 25)
+      ch := (e & f) ^ ((^e) & g)
+      t1 := h + S1 + ch + k[i] + w[i]
+      S0 := rotR(a, 2) ^ rotR(a, 13) ^ rotR(a, 22)
+      maj := (a & b) ^ (a & c) ^ (b & c)
+      t2 := S0 + maj
 
-	h.resetState()
+      h = g
+      g = f
+      f = e
+      e = d + t1
+      d = c
+      c = b
+      b = a
+      a = t1 + t2
+    }
 
-	return out
+    h0 = h0 + a
+    h1 = h1 + b
+    h2 = h2 + c
+    h3 = h3 + d
+    h4 = h4 + e
+    h5 = h5 + f
+    h6 = h6 + g
+    h7 = h7 + h
+  }
+
+  digestBytes := [][]byte{
+    toB(h0),
+    toB(h1),
+    toB(h2),
+    toB(h3),
+    toB(h4),
+    toB(h5),
+    toB(h6),
+    toB(h7),
+  }
+
+  var digest []byte
+  digestArr := [32]byte{}
+  for i := 0; i < 8; i++ {
+    digest = append(digest, digestBytes[i]...)
+  }
+  copy(digestArr[:], digest[0:32])
+
+  return digestArr
 }
 
-func (h *SHA256) numPadZero(L int) int {
-	lenInBits := L * 8
-	m := lenInBits + 1 + 64
-	return chunkSizeBits - m%chunkSizeBits
+func toB(i uint32) []byte {
+  bs := make([]byte, 4)
+  binary.BigEndian.PutUint32(bs, i)
+  return bs
 }
 
-func (h *SHA256) padMessage(data []uint8) []uint8 {
-	b := data
-	dataLen := len(data)
-	zerosLen := ((h.numPadZero(dataLen) + 1) / 8) - 1
-	firstByteAfterMessage := uint8(0b10000000)
-
-	b = append(b, firstByteAfterMessage)
-	for i := 0; i < zerosLen; i++ {
-		b = append(b, 0b00000000)
-	}
-
-	lenAsBytes := make([]uint8, 8)
-	binary.BigEndian.PutUint64(lenAsBytes, uint64(dataLen*8))
-	b = append(b, lenAsBytes...)
-
-	return b
+func rotR(n uint32, d uint) uint32 {
+  return (n >> d) | (n << (32 - d))
 }
 
-func (h *SHA256) chunks(data []uint8) [][]uint8 {
-	chunks := make([][]uint8, 0)
-	for i := 0; i < len(data); i += chunkSize {
-		chunks = append(chunks, data[i:i+chunkSize])
-	}
-	return chunks
-}
-
-func (h *SHA256) messageSchedule(chunk []uint8) []uint32 {
-	messageSchedule := make([]uint32, 0)
-	for i := 0; i < len(chunk); i += 4 {
-		messageSchedule = append(messageSchedule, binary.BigEndian.Uint32(chunk[i:i+4]))
-	}
-	for j := 16; j < 64; j++ {
-		messageSchedule = append(messageSchedule, 0)
-	}
-	return messageSchedule
+func applySecret(message []byte, secret string) []byte {
+  b := []byte(secret)
+  return append(message, b...)
 }

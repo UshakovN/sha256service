@@ -7,8 +7,10 @@ import (
   "html/template"
 )
 
-func (h *Handler) HandleMainPage(w http.ResponseWriter, r *http.Request) {
-  path := fmt.Sprint(htmlTemplatePrefixPath, htmlTemplateMain)
+const htmlTemplateAbout = "about.html"
+
+func (h *Handler) HandleAboutPage(w http.ResponseWriter, r *http.Request) {
+  path := fmt.Sprint(htmlTemplatePrefixPath, htmlTemplateAbout)
   t, err := template.ParseFiles(path)
   if err != nil {
     tools.WriteInternalError(w, r, fmt.Errorf("cannot parse %s", path))

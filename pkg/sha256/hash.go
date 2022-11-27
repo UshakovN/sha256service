@@ -1,8 +1,7 @@
 package sha256
 
 type SHA256 struct {
-  initial []uint32
-  k       []uint32
+  initial, k []uint32
 }
 
 var (
@@ -35,7 +34,15 @@ func New() *SHA256 {
   }
 }
 
-func (h *SHA256) resetState() {
-  h.initial = initial
-  h.k = k
+func (hash *SHA256) resetState() {
+  hash.initial = initial
+  hash.k = k
+}
+
+func (hash *SHA256) getInitial() []uint32 {
+  return hash.initial
+}
+
+func (hash *SHA256) getK() []uint32 {
+  return hash.k
 }

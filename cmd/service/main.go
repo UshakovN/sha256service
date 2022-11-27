@@ -8,8 +8,9 @@ import (
   "os"
   "os/signal"
   "sha256service/internal/handler"
-  "sha256service/internal/httpclient"
+  "sha256service/pkg/sha256"
   "syscall"
+  "sha256service/internal/router"
 )
 
 func ContinuouslyHandleRequests(port *string, mux http.Handler) {
@@ -26,11 +27,10 @@ func main() {
   ctx := context.Background()
 
   requestHandler := handler.NewRequestHandler(&handler.Config{
-    Ctx: ctx,
-    //HashClient: sha256.New(),
-    HttpClient: httpclient.NewHTTPClient(ctx),
+    Ctx:        ctx,
+    HashClient: sha256.New(),
   })
-  routesHandler := handler.GetRoutesHandler(requestHandler)
+  routesHandler := router.GetRoutesHandler(requestHandler)
 
   go ContinuouslyHandleRequests(port, routesHandler)
 

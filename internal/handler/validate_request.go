@@ -1,16 +1,19 @@
 package handler
 
-import "fmt"
+import (
+  "fmt"
+  "sha256service/internal/request"
+)
 
 func validateRequest(message any) error {
   switch message.(type) {
-  case *CreateHashRequest:
-    req := message.(*CreateHashRequest)
+  case *request.CreateHashRequest:
+    req := message.(*request.CreateHashRequest)
     if req.Payload == nil {
       return fmt.Errorf("empty payload")
     }
-  case *CompareHashRequest:
-    req := message.(*CompareHashRequest)
+  case *request.CompareHashRequest:
+    req := message.(*request.CompareHashRequest)
     if req.Payload == nil {
       return fmt.Errorf("empty payload")
     }

@@ -4,10 +4,11 @@ import (
   "net/http"
   "sha256service/internal/tools"
   "fmt"
+  "sha256service/internal/request"
 )
 
-func (h *Handler) HandleCreateHash(w http.ResponseWriter, r *http.Request) {
-  req := &CreateHashRequest{}
+func (h *Handler) HandleCompareHash(w http.ResponseWriter, r *http.Request) {
+  req := &request.CompareHashRequest{}
   var err error
   if err = tools.ReadRequest(r, req); err != nil {
     tools.WriteRequestError(w, r, err)
@@ -17,12 +18,12 @@ func (h *Handler) HandleCreateHash(w http.ResponseWriter, r *http.Request) {
     tools.WriteRequestError(w, r, err)
     return
   }
-  rawBytes, err := preparePayload(req.Payload, req.PayloadType)
+  rawBytes, err := request.PreparePayload(req.Payload, req.PayloadType)
   if err != nil {
     tools.WriteInternalError(w, r, err)
     return
   }
-  resp, err := h.GetHash(rawBytes, req.Secret)
+  resp, err := h.CompareHash(rawBytes, req.ClaimHash, req.Secret)
   if err != nil {
     tools.WriteInternalError(w, r, fmt.Errorf("cannot get item hash: %v", err))
     return

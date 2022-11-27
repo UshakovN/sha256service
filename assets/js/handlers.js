@@ -132,7 +132,7 @@ function handleCreateHash() {
             hashPayloadType = payloadTypeEncodedFile
             let reader = new FileReader()
             reader.onload = function () {
-                hashPayload = reader.result.split(',')[1];
+                hashPayload = reader.result.split(',')[1]
                 let resp = reqCreateHash(secret, hashPayload, hashPayloadType)
                 setOutputHashSum(resp, output)
             }

@@ -1,4 +1,4 @@
-package handler
+package request
 
 import (
   "fmt"
@@ -34,7 +34,7 @@ type CompareHashResponse struct {
   ComparedAt string `json:"compared_at"`
 }
 
-func preparePayload(payload any, payloadType string) ([]byte, error) {
+func PreparePayload(payload any, payloadType string) ([]byte, error) {
   var b []byte
   switch payloadType {
 
